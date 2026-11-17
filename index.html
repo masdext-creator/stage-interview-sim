@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Simulateur d’entretien de stage</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#131a2b;--mut:#65708a;--ac:#1d3b6f;--ac2:#e8eefb;--ok:#17803d;--bad:#b42318;--bd:#dde2ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1420;--card:#171e2e;--tx:#e8ecf6;--mut:#97a2bd;--ac:#8fb0f5;--ac2:#202b45;--ok:#4cc38a;--bad:#f08a80;--bd:#2a3550}}
+:root[data-theme="dark"]{--bg:#0f1420;--card:#171e2e;--tx:#e8ecf6;--mut:#97a2bd;--ac:#8fb0f5;--ac2:#202b45;--ok:#4cc38a;--bad:#f08a80;--bd:#2a3550}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.5rem;margin:0 0 4px}h2{font-size:1.1rem;margin:20px 0 8px}
+p.sub{color:var(--mut);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+.hero{background:linear-gradient(135deg,var(--ac2),var(--card));border-color:var(--ac2)}
+.hero-tag{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--ac);color:var(--bg);font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+label{display:block;font-weight:600;margin:12px 0 4px;font-size:.9rem}
+input,textarea,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:70px;resize:vertical}
+button{font:inherit;border:0;border-radius:10px;padding:10px 16px;background:var(--ac);color:var(--bg);font-weight:600;cursor:pointer}
+button.alt{background:var(--ac2);color:var(--ac)}button:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:140px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{background:var(--ac2);color:var(--ac);flex:1}.seg button.on{background:var(--ac);color:var(--bg)}
+.steps{display:flex;gap:4px;margin:8px 0 12px}.steps i{flex:1;height:6px;border-radius:3px;background:var(--bd)}.steps i.done{background:var(--ac)}
+.stepname{font-size:.85rem;color:var(--mut);margin-bottom:6px}
+#chat{display:flex;flex-direction:column;gap:10px;min-height:280px;max-height:55vh;overflow-y:auto;padding:4px}
+.b{max-width:85%;padding:10px 13px;border-radius:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.b.r{background:var(--ac2);align-self:flex-start;border-bottom-left-radius:4px}
+.b.u{background:var(--ac);color:var(--bg);align-self:flex-end;border-bottom-right-radius:4px}
+.compose{display:flex;gap:8px;margin-top:10px;align-items:flex-end}.compose textarea{min-height:48px}
+.bar{height:10px;background:var(--bd);border-radius:5px;overflow:hidden}.bar>div{height:100%;background:var(--ac)}
+.sc{display:grid;grid-template-columns:150px 1fr 40px;gap:8px;align-items:center;margin:6px 0;font-size:.9rem}
+.big{font-size:2.6rem;font-weight:800;color:var(--ac)}
+.good{color:var(--ok)}.bad{color:var(--bad)}.mut{color:var(--mut);font-size:.9rem}
+.hist{display:flex;align-items:flex-end;gap:5px;height:70px;margin-top:8px}.hist div{flex:1;background:var(--ac);border-radius:4px 4px 0 0;min-width:10px;position:relative}
+.hide{display:none}.err{color:var(--bad);margin-top:8px}
+.mr{border-left:3px solid var(--ac);padding:6px 12px;margin:8px 0;background:var(--ac2);border-radius:0 8px 8px 0}
+@media(max-width:520px){.sc{grid-template-columns:1fr 1fr 34px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Simulateur d’entretien de stage</h1>
+<p class="sub">Un recruteur IA réaliste, sans aide pendant l’épreuve, puis un débrief noté sur 20. Rejoue pour progresser.</p>
+
+<section id="setup">
+ <div class="card hero">
+  <div class="hero-tag">Préparation</div>
+  <h2 style="margin:8px 0 6px">Simule un vrai entretien de stage</h2>
+  <p class="mut" style="margin:0 0 14px">Personnalise ta session en quelques secondes, puis réponds comme à l’oral. Pas de clé, pas d’IA externe : tout est intégré directement dans cette page.</p>
+  <div class="row">
+   <div>
+    <label for="nom">Prénom</label>
+    <input id="nom" placeholder="Ex. Emma">
+   </div>
+   <div>
+    <label for="poste">Poste visé</label>
+    <input id="poste" placeholder="Ex. Stage marketing sportif – club de football">
+   </div>
+  </div>
+ </div>
+ <div class="card">
+  <label for="offre">Offre / contexte</label>
+  <textarea id="offre" placeholder="Colle l’offre, les missions, le profil recherché…"></textarea>
+  <label for="cv">Ton CV en quelques lignes</label>
+  <textarea id="cv" placeholder="Formation, expériences, résultats marquants…"></textarea>
+  <label>Recruteur</label>
+  <div class="seg" id="segP"></div>
+  <label>Difficulté</label>
+  <div class="seg" id="segD"></div>
+  <label>Format</label>
+  <div class="seg" id="segF"></div>
+  <p class="mut" style="margin-top:12px">Un vrai entretien dure 20 à 30 minutes : réponds avec des exemples concrets, des résultats et un vrai point de vue.</p>
+  <button id="go" style="margin-top:6px">Lancer l’entretien</button>
+  <div id="e0" class="err"></div>
+ </div>
+ <div class="card" id="histCard">
+  <h2 style="margin-top:0">Ta progression</h2>
+  <div id="histBody" class="mut">Aucune simulation pour l’instant.</div>
+ </div>
+</section>
+
+<section id="run" class="hide">
+ <div class="card">
+  <div class="stepname" id="stepname"></div>
+  <div class="steps" id="steps"></div>
+  <div id="chat" aria-live="polite"></div>
+  <div class="compose">
+   <textarea id="inp" placeholder="Ta réponse…"></textarea>
+   <button id="mic" class="alt hide" title="Dicter">🎤</button>
+   <button id="send">Envoyer</button>
+  </div>
+  <div class="row" style="margin-top:10px">
+   <button class="alt" id="end">Terminer et débriefer</button>
+   <button class="alt" id="quit">Abandonner</button>
+  </div>
+  <div id="e1" class="err"></div>
+ </div>
+</section>
+
+<section id="deb" class="hide"><div class="card" id="debBody">Analyse de ton entretien…</div>
+ <div class="row"><button id="again">Rejouer</button><button class="alt" id="home">Accueil</button><button class="alt" id="dl">Télécharger le débrief</button></div>
+</section>
+</main>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var STEPS=["Accueil","Parcours","Motivation","Mise en situation","Objections","Conditions","Clôture"];
+var PROFILS=["Aléatoire","RH pressée","Manager marketing orienté résultats","Dirigeant d’agence direct","Tuteur bienveillant mais précis"];
+var DIFFS=["Bienveillant","Standard","Exigeant"];
+var FORMATS=["Complet (7 étapes)","Flash (5 questions)"];
+var sel={p:0,d:1,f:0},sample=null,msgs=[],ctx="",phase=0,busy=false,ctrl=null,lastDeb=null;
+
+function seg(id,arr,key){var el=$(id);arr.forEach(function(t,i){var b=document.createElement("button");b.textContent=t;if(sel[key]===i)b.className="on";b.onclick=function(){sel[key]=i;[].forEach.call(el.children,function(c,j){c.className=j===i?"on":""})};el.appendChild(b)})}
+seg("segP",PROFILS,"p");seg("segD",DIFFS,"d");seg("segF",FORMATS,"f");
+function show(id){["setup","run","deb"].forEach(function(s){$(s).classList.toggle("hide",s!==id)})}
+function load(){try{return JSON.parse(localStorage.getItem("sim_hist")||"[]")}catch(e){return[]}}
+function save(h){try{localStorage.setItem("sim_hist",JSON.stringify(h.slice(-12)))}catch(e){}}
+function renderHist(){var h=load(),b=$("histBody");if(!h.length)return;b.textContent="";var avg=Math.round(h.reduce(function(a,x){return a+x.note},0)/h.length*10)/10;
+ var t=document.createElement("div");t.textContent=h.length+" simulation"+(h.length>1?"s":"")+" · moyenne "+avg+"/20 · dernière note "+h[h.length-1].note+"/20";b.appendChild(t);
+ var g=document.createElement("div");g.className="hist";h.forEach(function(x){var d=document.createElement("div");d.style.height=(x.note/20*100)+"%";d.title=x.poste+" : "+x.note+"/20";g.appendChild(d)});b.appendChild(g);
+ var keys={};h.forEach(function(x){(x.scores||[]).forEach(function(s){(keys[s.nom]=keys[s.nom]||[]).push(s.note)})});
+ var worst=null;Object.keys(keys).forEach(function(k){var m=keys[k].reduce(function(a,c){return a+c},0)/keys[k].length;if(!worst||m<worst.m)worst={k:k,m:m}});
+ if(worst){var w=document.createElement("div");w.style.marginTop="8px";w.textContent="Point à travailler en priorité : "+worst.k+" ("+Math.round(worst.m*10)/10+"/10)";b.appendChild(w)}}
+renderHist();
+
+function system(){
+ var prof=sel.p===0?"choisis un profil parmi RH pressée, manager marketing orienté résultats, dirigeant d’agence direct, tuteur bienveillant mais précis":"ton profil est : "+PROFILS[sel.p];
+ var fl=sel.f===1;
+ return "Tu es un recruteur qui fait passer un entretien de stage en français à un étudiant. Tu joues un recruteur réaliste, exigeant et crédible ; "+prof+" (ne le révèle jamais). Difficulté : "+DIFFS[sel.d]+".\n"+
+ "RÈGLES : une seule question à la fois, répliques courtes comme à l’oral (2 à 4 phrases), vouvoiement. Tu ne donnes aucun indice, tu ne valides pas les réponses, tu ne sors jamais du personnage. Si les réponses sont vagues ou génériques, relance : « Un exemple concret ? », « Quel résultat ? », « Et vous personnellement ? ».\n"+
+ (fl?"FORMAT FLASH : pose exactement 5 questions variées (parcours, motivation, mise en situation, objection, conditions), puis clôture.\n":"DÉROULÉ en 7 étapes numérotées : 1 Accueil, 2 Parcours, 3 Motivation, 4 Mise en situation, 5 Objections, 6 Conditions, 7 Clôture.\n")+
+ "IMPORTANT : commence CHAQUE réponse par une balise [E:n] où n est le numéro d’étape en cours (1 à 7"+(fl?", utilise 1 à 7 en progressant avec tes 5 questions":"")+"). Quand l’entretien est terminé après ta décision finale, ajoute [FIN] à la toute fin.\n\nCONTEXTE\n"+ctx;
+}
+
+function paint(){var s=$("steps");s.textContent="";STEPS.forEach(function(n,i){var e=document.createElement("i");if(i<phase)e.className="done";s.appendChild(e)});$("stepname").textContent=phase?("Étape "+phase+"/7 · "+STEPS[phase-1]):"Début de l’entretien"}
+function bubble(cls,t){var d=document.createElement("div");d.className="b "+cls;d.textContent=t;$("chat").appendChild(d);$("chat").scrollTop=1e9;return d}
+function clean(t){var m=/\[E:(\d)\]/.exec(t);if(m){var n=+m[1];if(n>=1&&n<=7)phase=Math.max(phase,n)}return t.replace(/\[E:\d\]/g,"").replace("[FIN]","").trim()}
+function conv(){var first="Voici tes instructions. "+system()+"\n\nCommence maintenant l’entretien.";var a=[{role:"user",content:first}];msgs.forEach(function(m){a.push(m)});return a}
+
+function questionForStep(step){
+ var q={
+  1:"Bonjour, merci d’être là. Pour commencer, pouvez-vous vous présenter très brièvement ?",
+  2:"Parlez-moi de votre parcours et de ce qui vous a conduit à vouloir ce stage.",
+  3:"Pourquoi ce stage, et pourquoi cette organisation en particulier ?",
+  4:"Donnez-moi un exemple concret d’une situation où vous avez montré initiative, travail d’équipe ou résultat.",
+  5:"J’ai un doute : vous n’avez pas beaucoup d’expérience dans ce domaine. Qu’est-ce qui vous rend convaincant pour ce poste ?",
+  6:"Quelles sont vos disponibilités, vos contraintes et vos attentes salariales ou de formation pour ce stage ?",
+  7:"Avez-vous des questions pour moi ?"
+ };
+ if(sel.d===2 && step===5){
+  q[5]="Vous êtes sans expérience directe sur ce domaine. Expliquez-moi ce qui, selon vous, montre que vous pouvez réussir ici.";
+ }
+ if(sel.d===0){
+  q[5]="Je comprends que ce n’est pas votre domaine principal. Qu’est-ce qui vous a poussé à postuler et comment comptez-vous rattraper l’écart ?";
+ }
+ return q[step]||"Pouvez-vous développer davantage sur ce point ?";
+}
+
+function buildLocalQuestion(){
+ var answered = msgs.filter(function(m){return m.role==="user"}).length;
+ var total = sel.f===1?5:7;
+ if(answered >= total){
+  phase = total;
+  return "[E:"+total+"] Merci, c’est clair. Je vais maintenant vous donner mon avis final. [FIN]";
+ }
+ var step = Math.min(answered + 1, total);
+ phase = step;
+ return "[E:"+step+"] "+questionForStep(step);
+}
+
+function localDebrief(){
+ var answers = msgs.filter(function(m){return m.role==="user"}).map(function(m){return m.content;}).join(" ").toLowerCase();
+ var concrete = /(exemple|résultat|objectif|chiffre|impact|team|projet|initiative|démarche)/.test(answers) ? 1 : 0;
+ var motivation = /(pourquoi|intérêt|mission|organisation|stage|poste)/.test(answers) ? 1 : 0;
+ var clarity = answers.length > 180 ? 1 : 0;
+ var base = 7 + (msgs.filter(function(m){return m.role==="user"}).length >= 3 ? 2 : 0) + concrete + motivation + clarity;
+ var score = Math.max(8, Math.min(18, base));
+ var justice = score >= 15 ? "Tu as une vraie base, mais tu peux encore aller plus loin sur les exemples et la précision." : score >= 12 ? "Tu as bien tenu le cadre, mais quelques réponses manquent de résultats concrets." : "L’entretien est encore trop générique : il faut renforcer la clarté, la motivation et les preuves concrètes.";
+ var scores=[
+  {nom:"Connaissance de l’organisation",note:Math.min(10,Math.max(4,Math.round(score/2)))},
+  {nom:"Contenu et exemples concrets",note:Math.min(10,Math.max(3,Math.round((score+2)/2)))},
+  {nom:"Traitement des objections",note:Math.min(10,Math.max(3,Math.round((score+1)/2)))},
+  {nom:"Savoir-être et clarté",note:Math.min(10,Math.max(5,Math.round((score+3)/2)))},
+  {nom:"Conditions et closing",note:Math.min(10,Math.max(4,Math.round((score+4)/2))) }
+ ];
+ var forces = [];
+ if(concrete) forces.push("Tu donnes une vraie impression de clarté dans tes réponses.");
+ if(motivation) forces.push("Ta motivation est identifiable et structurée.");
+ if(answers.length > 180) forces.push("Tu as tenu un discours assez fluide et assez détaillé.");
+ if(!forces.length) forces.push("Tu as su tenir la discussion et rester à l’écoute.");
+ var a_retravailler=[
+  {question:"Pourquoi ce stage ?",probleme:"Tu peux mieux montrer ta motivation concrète et la logique de ton choix.",reponse_modele:"Ce stage m’intéresse parce que votre structure met l’accent sur X, et je souhaite développer Y dans un cadre où j’ai déjà appris A et B."},
+  {question:"Exemple concret ?",probleme:"Ton réponse gagnerait à inclure un résultat chiffré ou un impact clair.",reponse_modele:"Pendant mon projet, j’ai amélioré X, ce qui a permis d’augmenter Y de Z %. J’ai ensuite appris à organiser le travail en priorité et à documenter les résultats."},
+  {question:"Que pouvez-vous apporter ?",probleme:"Il faut parler de toi, de ton utilité, pas seulement de ton intérêt pour le poste.",reponse_modele:"Je peux apporter une énergie de terrain, une organisation rigoureuse et un sens de l’écoute, en plus de ma capacité à analyser les besoins et à proposer des idées concrètes."}
+ ];
+ var plan=[
+  "Prépare 3 exemples concrets avec un résultat chiffré et un contexte précis.",
+  "Répète ton pitch de motivation avec une phrase d’ouverture forte et une phrase de clôture claire.",
+  "Exerce-toi à répondre aux objections en gardant une structure simple : situation, action, résultat."
+ ];
+ return {note:Math.round(score),justification:justice,scores:scores,forces:forces.slice(0,3),a_retravailler:a_retravailler,plan:plan};
+}
+
+function makeSample(){
+  var f=async function(input,o){
+   o=o||{};
+   var text=buildLocalQuestion();
+   if(o.onText)o.onText({text:text});
+   return {text:text};
+  };
+  f.json=async function(){return localDebrief();};
+  return f;
+}
+
+async function ask(){
+ busy=true;$("send").disabled=true;$("e1").textContent="";
+ var d=bubble("r","…");
+ try{
+  var r=await sample(conv(),{onText:function(o){d.textContent=clean(o.text)||"…";paint();$("chat").scrollTop=1e9}});
+  var raw=r.text;d.textContent=clean(raw);paint();msgs.push({role:"assistant",content:raw});
+  if(/\[FIN\]/.test(raw)){$("inp").disabled=true;$("send").disabled=true;busy=false;setTimeout(debrief,900);return}
+ }catch(e){d.remove();$("e1").textContent="Une erreur est survenue dans le simulateur.";}
+ busy=false;$("send").disabled=false;$("inp").focus();
+}
+
+$("go").onclick=async function(){
+ var poste=$("poste").value.trim();if(!poste){$("e0").textContent="Indique le poste visé.";return}
+ $("e0").textContent="";
+ sample=makeSample();
+ ctx="Poste : "+poste+"\nOffre : "+($("offre").value.trim()||"non fournie")+"\nCV du candidat : "+($("cv").value.trim()||"non fourni (pose des questions ouvertes sur son parcours)");
+ msgs=[];phase=0;$("chat").textContent="";$("inp").disabled=false;$("inp").value="";show("run");paint();ask();
+};
+async function send(){if(busy)return;var t=$("inp").value.trim();if(!t)return;$("inp").value="";bubble("u",t);msgs.push({role:"user",content:t});ask()}
+$("send").onclick=send;
+$("inp").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();send()}});
+$("quit").onclick=function(){busy=false;show("setup")};
+$("end").onclick=function(){if(msgs.filter(function(m){return m.role==="user"}).length<2){$("e1").textContent="Réponds à au moins deux questions avant de demander le débrief.";return}debrief()};
+$("again").onclick=function(){show("setup")};$("home").onclick=function(){renderHist();show("setup")};
+async function debrief(){
+ show("deb");$("debBody").textContent="Analyse de ton entretien…";
+ try{
+  var j=await sample.json();lastDeb=j;
+  var h=load();h.push({d:Date.now(),poste:$("poste").value.trim(),note:j.note,scores:j.scores});save(h);
+  var b=$("debBody");b.textContent="";
+  function el(t,c,txt,par){var e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;(par||b).appendChild(e);return e}
+  el("div","big",j.note+"/20");el("p","mut",j.justification);
+  el("h2",null,"Grille de compétences");
+  j.scores.forEach(function(s){var r=el("div","sc");el("span",null,s.nom,r);var bar=el("div","bar",null,r);var f=document.createElement("div");f.style.width=(s.note*10)+"%";bar.appendChild(f);el("span",null,s.note+"/10",r)});
+  el("h2","good","Points forts");j.forces.forEach(function(x){el("div",null,"✓ "+x)});
+  el("h2",null,"3 réponses à retravailler");
+  j.a_retravailler.forEach(function(x){el("div",null,"« "+x.question+" »").style.fontWeight="600";el("div","bad",x.probleme);var m=el("div","mr");el("div","mut","Réponse modèle",m);el("div",null,x.reponse_modele,m)});
+  el("h2",null,"Plan d’entraînement");j.plan.forEach(function(x,i){el("div",null,(i+1)+". "+x)});
+ }catch(e){$("debBody").textContent="Le débrief n’a pas pu être généré. Reviens à l’accueil et réessaie.";}
+}
+$("dl").onclick=async function(){if(!lastDeb)return; var j=lastDeb,t="DÉBRIEF D’ENTRETIEN – "+$("poste").value+"\nNote : "+j.note+"/20\n"+j.justification+"\n\n"+j.scores.map(function(s){return s.nom+" : "+s.note+"/10"}).join("\n")+"\n\nPoints forts :\n- "+j.forces.join("\n- ")+"\n\nÀ retravailler :\n"+j.a_retravailler.map(function(x){return"• "+x.question+"\n  "+x.probleme+"\n  Modèle : "+x.reponse_modele}).join("\n")+"\n\nPlan :\n- "+j.plan.join("\n- ");
+ var u=URL.createObjectURL(new Blob([t],{type:"text/plain;charset=utf-8"})),a=document.createElement("a");a.href=u;a.download="debrief-entretien.txt";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},1000)};
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){var mic=$("mic");mic.classList.remove("hide");var rec=null;mic.onclick=function(){if(rec){rec.stop();return}try{rec=new SR();rec.lang="fr-FR";rec.interimResults=false;rec.onresult=function(e){var t=e.results[0][0].transcript;$("inp").value=($("inp").value+" "+t).trim()};rec.onend=function(){rec=null;mic.textContent="🎤"};mic.textContent="⏹";rec.start()}catch(e){rec=null}}}
+})();
+</script>
+</body>
+</html>
